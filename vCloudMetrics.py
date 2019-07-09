@@ -294,3 +294,198 @@ class Connector():
             return 0
         else:
             return MemoryLimit
+
+##################################################################################################################
+
+    def getDiskIDsbyVM(self, org, orgVDC, orgVM):
+        self.orgs = self.client.get_org_list()
+        orgfound = False
+        vdcfound = False
+        vmfound = False
+        Disks = []
+        for org_resource in self.orgs:
+            name = org_resource.get('name')
+            if name == org:
+                orgfound = True
+                org = Org(self.client, resource=org_resource)
+                for vdc_info in org:
+                    if vdc_info['name'] == orgVDC:
+                        vdcfound = True
+                        vdc = VDC(self.client, resource=org.get_vdc(vdc_info['name']))
+                        for resource in vdc.list_resources(EntityType.VAPP):
+                            vapp = VApp(self.client, resource=vdc.get_vapp(resource['name']))
+                            for vm_info in vapp.get_all_vms():
+                                if orgVM == vm_info.get('name'):
+                                    name_vm = vm_info.get('name')
+                                    vm = VM(self.client, resource=vapp.get_vm(name_vm))
+                                    vmfound = True
+                                    vm_xml = vm.get_resource()
+                                    for disk in vm_xml.VmSpecSection.DiskSection.getchildren():
+                                        for e in disk.getchildren():
+                                            e1 = re.sub('{http://www.vmware.com/vcloud/v1.5}', '', e.tag)
+                                            if e1 == "DiskId":
+                                                Disks.append(e.text)
+        if not orgfound:
+            print("Organisation with this name not found")
+            return 0
+        elif not vdcfound:
+            print("VDC with this name not found")
+            return 0
+        elif not vmfound:
+            print("VM with this name not found")
+            return 0
+        else:
+            return Disks
+
+    def getCPUNumByVM(self, org, orgVDC, orgVM):
+        self.orgs = self.client.get_org_list()
+        orgfound = False
+        vdcfound = False
+        vmfound = False
+        for org_resource in self.orgs:
+            name = org_resource.get('name')
+            if name == org:
+                orgfound = True
+                org = Org(self.client, resource=org_resource)
+                for vdc_info in org:
+                    if vdc_info['name'] == orgVDC:
+                        vdcfound = True
+                        vdc = VDC(self.client, resource=org.get_vdc(vdc_info['name']))
+                        for resource in vdc.list_resources(EntityType.VAPP):
+                            vapp = VApp(self.client, resource=vdc.get_vapp(resource['name']))
+                            for vm_info in vapp.get_all_vms():
+                                if orgVM == vm_info.get('name'):
+                                    name_vm = vm_info.get('name')
+                                    vm = VM(self.client, resource=vapp.get_vm(name_vm))
+                                    numcpus = vm.get_cpus()
+        if not orgfound:
+            print("Organisation with this name not found")
+            return 0
+        elif not vdcfound:
+            print("VDC with this name not found")
+            return 0
+        elif not vmfound:
+            print("VM with this name not found")
+            return 0
+        else:
+            return numcpus
+
+    def getMemoryUsedbyVM(self, org, orgVDC, orgVM):
+        self.orgs = self.client.get_org_list()
+        orgfound = False
+        vdcfound = False
+        vmfound = False
+        for org_resource in self.orgs:
+            name = org_resource.get('name')
+            if name == org:
+                orgfound = True
+                org = Org(self.client, resource=org_resource)
+                for vdc_info in org:
+                    if vdc_info['name'] == orgVDC:
+                        vdcfound = True
+                        vdc = VDC(self.client, resource=org.get_vdc(vdc_info['name']))
+                        for resource in vdc.list_resources(EntityType.VAPP):
+                            vapp = VApp(self.client, resource=vdc.get_vapp(resource['name']))
+                            for vm_info in vapp.get_all_vms():
+                                if orgVM == vm_info.get('name'):
+                                    name_vm = vm_info.get('name')
+                                    vm = VM(self.client, resource=vapp.get_vm(name_vm))
+                                    memory = vm.get_memory()
+        if not orgfound:
+            print("Organisation with this name not found")
+            return 0
+        elif not vdcfound:
+            print("VDC with this name not found")
+            return 0
+        elif not vmfound:
+            print("VM with this name not found")
+            return 0
+        else:
+            return memory
+
+    def getStorageUsedByVM(self, org, orgVDC, orgVM):
+        self.orgs = self.client.get_org_list()
+        orgfound = False
+        vdcfound = False
+        vmfound = False
+        DisksUsed = []
+        for org_resource in self.orgs:
+            name = org_resource.get('name')
+            if name == org:
+                orgfound = True
+                org = Org(self.client, resource=org_resource)
+                for vdc_info in org:
+                    if vdc_info['name'] == orgVDC:
+                        vdcfound = True
+                        vdc = VDC(self.client, resource=org.get_vdc(vdc_info['name']))
+                        for resource in vdc.list_resources(EntityType.VAPP):
+                            vapp = VApp(self.client, resource=vdc.get_vapp(resource['name']))
+                            for vm_info in vapp.get_all_vms():
+                                if orgVM == vm_info.get('name'):
+                                    name_vm = vm_info.get('name')
+                                    vm = VM(self.client, resource=vapp.get_vm(name_vm))
+                                    vmfound = True
+                                    vm_xml = vm.get_resource()
+                                    for disk in vm_xml.VmSpecSection.DiskSection.getchildren():
+                                        for e in disk.getchildren():
+                                            e1 = re.sub('{http://www.vmware.com/vcloud/v1.5}', '', e.tag)
+                                            if e1 == "SizeMb":
+                                                DisksUsed.append(e.text)
+        if not orgfound:
+            print("Organisation with this name not found")
+            return 0
+        elif not vdcfound:
+            print("VDC with this name not found")
+            return 0
+        elif not vmfound:
+            print("VM with this name not found")
+            return 0
+        else:
+            return DisksUsed
+
+    def getStorageUsedByDiskId(self, org, orgVDC, orgVM, DiskID):
+        self.orgs = self.client.get_org_list()
+        orgfound = False
+        vdcfound = False
+        vmfound = False
+        DiskFound = False
+        for org_resource in self.orgs:
+            name = org_resource.get('name')
+            if name == org:
+                orgfound = True
+                org = Org(self.client, resource=org_resource)
+                for vdc_info in org:
+                    if vdc_info['name'] == orgVDC:
+                        vdcfound = True
+                        vdc = VDC(self.client, resource=org.get_vdc(vdc_info['name']))
+                        for resource in vdc.list_resources(EntityType.VAPP):
+                            vapp = VApp(self.client, resource=vdc.get_vapp(resource['name']))
+                            for vm_info in vapp.get_all_vms():
+                                if orgVM == vm_info.get('name'):
+                                    name_vm = vm_info.get('name')
+                                    vm = VM(self.client, resource=vapp.get_vm(name_vm))
+                                    vmfound = True
+                                    vm_xml = vm.get_resource()
+                                    for disk in vm_xml.VmSpecSection.DiskSection.getchildren():
+                                        for e in disk.getchildren():
+                                            e1 = re.sub('{http://www.vmware.com/vcloud/v1.5}', '', e.tag)
+                                            if e1 == "DiskId":
+                                                Id = e.text
+                                            if e1 == "SizeMb":
+                                                Size = e.text
+                                            if Id == DiskID:
+                                                DiskFound = True
+
+        if not orgfound:
+            print("Organisation with this name not found")
+            return 0
+        elif not vdcfound:
+            print("VDC with this name not found")
+            return 0
+        elif not vmfound:
+            print("VM with this name not found")
+            return 0
+        elif not DiskFound:
+            print("Disk With this id not found")
+        else:
+            return Size
