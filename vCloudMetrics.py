@@ -487,5 +487,6 @@ class Connector():
             return 0
         elif not DiskFound:
             print("Disk With this id not found")
+            return 0 
         else:
             return Size
